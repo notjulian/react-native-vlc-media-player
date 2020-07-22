@@ -210,14 +210,14 @@ export default class VLCPlayerView extends Component {
    * start then video
    */
   play = () => {
-    this.vlcPlayer.onVideoStopped(false);
+    this.vlcPlayer._onStopped(false);
   };
 
   /**
    * paused the video
    */
   pause = () => {
-    this.vlcPlayer.onVideoStopped(true);
+    this.vlcPlayer._onStopped(true);
   };
 
   /**
