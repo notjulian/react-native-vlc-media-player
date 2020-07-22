@@ -17,7 +17,7 @@ import {
   Image,
   ScrollView
 } from 'react-native';
-import NetInfo from '@react-native-community/netinfo'
+import NetInfo from "@react-native-community/netinfo";
 import VLCPlayerView from './VLCPlayerView';
 import PropTypes from 'prop-types';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -65,6 +65,8 @@ const getTime = (data = 0) => {
 
 
 export default class VlCPlayerViewByMethod extends Component {
+  _subscription = null;
+
   constructor(props) {
     super(props);
     this.url = '';
@@ -269,20 +271,18 @@ export default class VlCPlayerViewByMethod extends Component {
 
   componentDidMount() {
     let { style, isAd, initWithFull } = this.props;
-    NetInfo.getConnectionInfo().then((connectionInfo) => {
-      NetInfo.isConnected.fetch().then(isConnected => {
-        this.setState({
-          netInfo: {
-            ...connectionInfo,
-            isConnected: isConnected,
-          }
-        })
-      });
+    NetInfo.fetch().then(connectionInfo => {
+      this.setState({
+        netInfo: {
+          isConnected: connectionInfo.isConnected,
+        }
+      })
     });
+
     this.checkShowControlInterval = setInterval(this.checkShowControls,1000);
-    NetInfo.addEventListener(
-      'connectionChange',
-      this.handleFirstConnectivityChange
+
+    this._subscription = NetInfo.addEventListener(
+      this.handleFirstConnectivityChange,
     );
 
     if(initWithFull){
@@ -301,10 +301,9 @@ export default class VlCPlayerViewByMethod extends Component {
     if(this.checkShowControlInterval){
       clearInterval(this.checkShowControlInterval);
     }
-    NetInfo.removeEventListener(
-      'connectionChange',
-      this.handleFirstConnectivityChange
-    );
+
+    this._subscription && this._subscription();
+
     Orientation && Orientation.lockToPortrait();
     StatusBar.setHidden(false);
   }
@@ -317,34 +316,31 @@ export default class VlCPlayerViewByMethod extends Component {
    *****************************/
 
   handleFirstConnectivityChange = (connectionInfo) => {
-    NetInfo.isConnected.fetch().then(isConnected => {
-      if(isConnected){
-        this.play();
-      }else{
-        this.stopPlay();
+
+    if(connectionInfo.isConnected){
+      this.play();
+    }else{
+      this.stopPlay();
+    }
+
+    this.setState({
+      netInfo: {
+        isConnected: connectionInfo.isConnected,
       }
-      this.setState({
-        netInfo: {
-          ...connectionInfo,
-          isConnected: isConnected,
-        }
-      })
-    });
+    })
   }
 
   _fetchNetWork = ()=>{
-    NetInfo.isConnected.fetch().then(isConnected => {
-      NetInfo.getConnectionInfo().then((connectionInfo) => {
-        if(isConnected){
-          this.play();
+    NetInfo.fetch().then(connectionInfo => {
+      if(connectionInfo.isConnected){
+        this.play();
+      }
+
+      this.setState({
+        netInfo: {
+          isConnected: connectionInfo.isConnected,
         }
-        this.setState({
-          netInfo: {
-            ...connectionInfo,
-            isConnected: isConnected,
-          }
-        })
-      });
+      })
     });
   }
 
@@ -758,7 +754,7 @@ export default class VlCPlayerViewByMethod extends Component {
   }
 
   /**
-   * 结束全屏
+   * Exit full screen
    * @private
    */
   _onCloseFullScreen = () => {
@@ -780,7 +776,7 @@ export default class VlCPlayerViewByMethod extends Component {
   };
 
   /**
-   * 全屏
+   * full screen
    * @private
    */
   _toFullScreen = () => {
@@ -797,7 +793,7 @@ export default class VlCPlayerViewByMethod extends Component {
   };
 
   /**
-   * 布局发生变化
+   * Layout changes
    * @param e
    * @private
    */
@@ -816,7 +812,7 @@ export default class VlCPlayerViewByMethod extends Component {
   };
 
   /**
-   * 显示章节
+   * Show chapter
    * @private
    */
   _showChapter = () => {
@@ -836,7 +832,7 @@ export default class VlCPlayerViewByMethod extends Component {
   };
 
   /**
-   * 隐藏章节
+   * Hidden chapters
    * @param time
    * @private
    */
@@ -938,9 +934,9 @@ export default class VlCPlayerViewByMethod extends Component {
             </View>
           </View>
           <View style={styles.centerContainer}>
-            <Text style={styles.centerContainerText} numberOfLines={1}>试看结束，请购买后观看</Text>
+            <Text style={styles.centerContainerText} numberOfLines={1}>The trial is over, please watch after purchase</Text>
             <TouchableOpacity activeOpacity={0.8} onPress={() => {onVipPress && onVipPress()}} style={[styles.centerContainerBtn,{ backgroundColor: 'rgb(230,33,41)'}]}>
-              <Text style={styles.centerContainerBtnText}>立即购买</Text>
+              <Text style={styles.centerContainerBtnText}>Buy now</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -957,11 +953,11 @@ export default class VlCPlayerViewByMethod extends Component {
     return(
       <View style={[styles.commonView,{ backgroundColor:'rgba(0,0,0,0)'}]}>
         <View style={styles.centerContainer}>
-          <Text style={styles.centerContainerText}>视频播放结束</Text>
+          <Text style={styles.centerContainerText}>End of video playback</Text>
           <View style={styles.centerRowContainer}>
             <TouchableOpacity style={styles.centerContainerBtn} onPress={this.reload} activeOpacity={1}>
               <Icon name={'reload'} size={20} color="#fff" />
-              <Text style={styles.centerContainerBtnText}>重新播放</Text>
+              <Text style={styles.centerContainerBtnText}>Replay</Text>
             </TouchableOpacity>
             {!autoPlayNext &&
             hadNext && (<TouchableOpacity style={[styles.centerContainerBtn,{marginLeft:15}]} onPress={this._next} activeOpacity={1}>
@@ -1001,10 +997,10 @@ export default class VlCPlayerViewByMethod extends Component {
           )}
         </View>
         <View style={styles.centerContainer}>
-          <Text style={styles.centerContainerText}>视频播放出错</Text>
+          <Text style={styles.centerContainerText}>Video playback error</Text>
           <TouchableOpacity style={styles.centerContainerBtn} onPress={this.reloadCurrent} activeOpacity={1}>
             <Icon name={'reload'} size={20} color="#fff" />
-            <Text style={styles.centerContainerBtnText}>重新播放</Text>
+            <Text style={styles.centerContainerBtnText}>Replay</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -1030,10 +1026,10 @@ export default class VlCPlayerViewByMethod extends Component {
             )}
           </View>
           <View style={styles.centerContainer}>
-            <Text style={styles.centerContainerText}>网络未连接，请检查网络设置</Text>
+            <Text style={styles.centerContainerText}>The network is not connected, please check the network settings</Text>
             <TouchableOpacity style={styles.centerContainerBtn} onPress={this._fetchNetWork} activeOpacity={1}>
               <Icon name={'reload'} size={20} color="#fff" />
-              <Text style={styles.centerContainerBtnText}>刷新重试</Text>
+              <Text style={styles.centerContainerBtnText}>Refresh and retry</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1077,7 +1073,7 @@ export default class VlCPlayerViewByMethod extends Component {
                 this._toFullScreen();
               }
             }}
-                          style={[styles.adBtn,{position:'absolute',right: 10, bottom: 10}]}>
+            style={[styles.adBtn,{position:'absolute',right: 10, bottom: 10}]}>
           <Icon name={isFull ? 'fullscreen-exit' : 'fullscreen'} size={26} color="#fff" />
         </TouchableOpacity>
       </View>
