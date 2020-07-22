@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "react-native-vlc-media-player"
-  s.version      = "1.0.6"
+  s.version      = "1.0.7"
   s.summary      = "VLC player"
   s.requires_arc = true
   s.author       = { 'roshan.milinda' => 'rmilinda@gmail.com' }
@@ -11,5 +11,5 @@ Pod::Spec.new do |s|
   s.platform     = :ios, "8.0"
   s.static_framework = true  
   s.dependency 'React'
-  s.dependency 'MobileVLCKit', '3.3.10'
+  s.dependency 'MobileVLCKit', '3.3.13'
 end
