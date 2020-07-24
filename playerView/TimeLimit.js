@@ -60,7 +60,7 @@ export default class TimeLimt extends Component {
           </View>
         )}
         <View style={styles.nameView}>
-          <Text style={{ fontSize: 13 }}>跳过片头</Text>
+          <Text style={{ fontSize: 13 }}>Skip the title</Text>
         </View>
       </TouchableOpacity>
     );

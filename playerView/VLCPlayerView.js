@@ -349,6 +349,7 @@ export default class VLCPlayerView extends Component {
   _onLoadStart = e => {
     console.log('_onLoadStart');
     console.log(e);
+    let { autoplay, initPaused } = this.props;
     let { isError } = this.state;
     if (isError) {
       this.reloadSuccess = true;
@@ -377,7 +378,7 @@ export default class VLCPlayerView extends Component {
         totalTime: 0.0,
       }, () => {
         this.setState({
-          paused: false,
+          paused: !autoplay,
         });
       })
     }
