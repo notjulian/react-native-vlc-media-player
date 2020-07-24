@@ -360,7 +360,7 @@ export default class VLCPlayerView extends Component {
         this.vlcPlayer.seek(currentTime);
       }
       this.setState({
-        paused: true,
+        paused: !autoplay,
         isError: false,
       }, () => {
         this.setState({
