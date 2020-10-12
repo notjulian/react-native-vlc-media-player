@@ -19,7 +19,7 @@
   "dependencies": {
     "react-native-slider": "^0.11.0",
     "react-native-vector-icons": "6.6.0",
-    "@react-native-community/netinfo": "^5.9.5"
+    "@react-native-community/netinfo": "^5.9.7"
   },
   "repository": {
     "type": "git",
